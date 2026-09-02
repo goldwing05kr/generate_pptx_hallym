@@ -1,0 +1,41 @@
+name: Generate PPTX
+
+on:
+  workflow_dispatch: # 웹에서 버튼 클릭으로 수동 실행
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: 1. 코드 가져오기
+        uses: actions/checkout@v4
+
+      - name: 2. 파이썬 환경 설정
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 3. PPTX 생성 라이브러리 설치
+        run: |
+          pip install python-pptx
+
+      - name: 4. 파이썬 스크립트 실행 (PPTX 생성)
+        run: |
+          python generate_pptx_hallym.py
+
+      - name: 5. PPTX 파일 다운로드용 아티팩트 보관
+        uses: actions/upload-artifact@v4
+        with:
+          name: architecture-pptx
+          path: system_architecture.pptx
+
+      - name: 6. 생성된 PPTX를 저장소에 자동 커밋
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add system_architecture.pptx
+          git commit -m "파워포인트 파일 자동 생성" || echo "No changes"
+          git push
